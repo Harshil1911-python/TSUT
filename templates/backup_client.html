@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Backup Client - TechSerenia UpTime{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Backup Client</h1>
+        <p>Loose integration: add a small Flask route or use the HTML helper in your own project to push backups to TechSerenia UpTime.</p>
+    </div>
+
+    <div class="card mb-2">
+        <h2 style="margin:0 0 0.75rem;font-size:1.05rem;">Your API Key</h2>
+        <p class="text-muted" style="font-size:0.9rem;">Include this value in the <code>X-API-Key</code> header on every backup request.</p>
+        <div class="code-block">{{ current_user.api_key }}</div>
+        <p class="mt-1"><a href="{{ url_for('profile') }}">Manage or regenerate</a> from your profile.</p>
+    </div>
+
+    <div class="card mb-2">
+        <h2 style="margin:0 0 0.75rem;font-size:1.05rem;">Endpoint</h2>
+        <div class="code-block">POST {{ request.url_root.rstrip('/') }}/api/v1/backup</div>
+        <p class="text-muted mt-1" style="font-size:0.9rem;">Multipart form field <code>file</code>, or raw body. Optional: <code>website_id</code>, <code>notes</code>, <code>source</code>.</p>
+    </div>
+
+    <div class="card mb-2">
+        <h2 style="margin:0 0 0.75rem;font-size:1.05rem;">Python Flask Helper</h2>
+        <p class="text-muted" style="font-size:0.9rem;">Copy the file below into your project (or install the snippet as a blueprint). Set environment variables <code>TSUT_API_KEY</code> and optionally <code>TSUT_BASE_URL</code>.</p>
+        <p><a href="{{ url_for('download_client_file', filename='tsut_backup.py') }}" class="btn btn-secondary btn-sm">Download tsut_backup.py</a></p>
+        <div class="code-block"># Example usage inside your Flask app or a cron job:
+from tsut_backup import upload_backup
+
+upload_backup(
+    file_path="/path/to/dump.sql",
+    api_key="YOUR_API_KEY",
+    base_url="{{ request.url_root.rstrip('/') }}",
+    website_id=None,  # optional
+    notes="Nightly database dump"
+)</div>
+    </div>
+
+    <div class="card mb-2">
+        <h2 style="margin:0 0 0.75rem;font-size:1.05rem;">HTML / Browser Helper</h2>
+        <p class="text-muted" style="font-size:0.9rem;">A minimal page you can host on your own domain to manually upload a file using your API key.</p>
+        <p><a href="{{ url_for('download_client_file', filename='upload.html') }}" class="btn btn-secondary btn-sm">Download upload.html</a></p>
+    </div>
+
+    <div class="card">
+        <h2 style="margin:0 0 0.75rem;font-size:1.05rem;">curl Example</h2>
+        <div class="code-block">curl -X POST "{{ request.url_root.rstrip('/') }}/api/v1/backup" \
+  -H "X-API-Key: {{ current_user.api_key }}" \
+  -F "file=@/path/to/backup.sql" \
+  -F "notes=Manual backup" \
+  -F "source=curl"</div>
+    </div>
+</div>
+{% endblock %}

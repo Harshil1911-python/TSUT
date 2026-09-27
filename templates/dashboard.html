@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - TechSerenia UpTime{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Dashboard</h1>
+        <p>Overview of your monitored websites and recent activity.</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">{{ total }}</div>
+            <div class="stat-label">Websites</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value text-success">{{ up_count }}</div>
+            <div class="stat-label">Currently Up</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value text-error">{{ down_count }}</div>
+            <div class="stat-label">Currently Down</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ avg_uptime }}%</div>
+            <div class="stat-label">Avg Uptime (30d)</div>
+        </div>
+    </div>
+
+    <div class="actions-row mb-2">
+        <a href="{{ url_for('add_website') }}" class="btn btn-primary">Add Website</a>
+        <a href="{{ url_for('analytics') }}" class="btn btn-secondary">View Analytics</a>
+        <a href="{{ url_for('history') }}" class="btn btn-secondary">Full History</a>
+    </div>
+
+    <div class="card">
+        <h2 style="margin:0 0 1rem;font-size:1.1rem;">Your Websites</h2>
+        {% if websites %}
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>URL</th>
+                        <th>Status</th>
+                        <th>Last Check</th>
+                        <th>Response</th>
+                        <th>Uptime 30d</th>
+                        <th>Interval</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for w in websites %}
+                    <tr>
+                        <td><a href="{{ url_for('website_detail', id=w.id) }}">{{ w.name }}</a></td>
+                        <td><a href="{{ w.url }}" target="_blank" rel="noopener">{{ w.url[:40] }}{% if w.url|length > 40 %}...{% endif %}</a></td>
+                        <td>
+                            {% if not w.is_active %}
+                            <span class="badge badge-paused">Paused</span>
+                            {% elif w.last_status == 'up' %}
+                            <span class="badge badge-up">Up</span>
+                            {% elif w.last_status == 'down' %}
+                            <span class="badge badge-down">Down</span>
+                            {% else %}
+                            <span class="badge badge-unknown">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>{% if w.last_checked %}{{ w.last_checked.strftime('%Y-%m-%d %H:%M') }} UTC{% else %}Never{% endif %}</td>
+                        <td>{% if w.last_response_time is not none %}{{ w.last_response_time }} ms{% else %}--{% endif %}</td>
+                        <td>{{ w.uptime_percentage(30) }}%</td>
+                        <td>{{ w.ping_interval }} min</td>
+                        <td>
+                            <div class="actions-row">
+                                <a href="{{ url_for('website_detail', id=w.id) }}" class="btn btn-sm btn-secondary">View</a>
+                                <form method="post" action="{{ url_for('toggle_website', id=w.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-secondary">{% if w.is_active %}Pause{% else %}Resume{% endif %}</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <p>You have not added any websites yet.</p>
+            <a href="{{ url_for('add_website') }}" class="btn btn-primary">Add Your First Website</a>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if recent_checks %}
+    <div class="card mt-2">
+        <h2 style="margin:0 0 1rem;font-size:1.1rem;">Recent Checks</h2>
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Website</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Code</th>
+                        <th>Response Time</th>
+                        <th>Error</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in recent_checks %}
+                    <tr>
+                        <td><a href="{{ url_for('website_detail', id=c.website_id) }}">{{ c.website.name }}</a></td>
+                        <td>{{ c.checked_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>
+                            {% if c.is_up %}<span class="badge badge-up">Up</span>
+                            {% else %}<span class="badge badge-down">Down</span>{% endif %}
+                        </td>
+                        <td>{{ c.status_code or '--' }}</td>
+                        <td>{% if c.response_time is not none %}{{ c.response_time }} ms{% else %}--{% endif %}</td>
+                        <td class="text-muted">{{ c.error_message or '' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

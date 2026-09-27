@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /terms
+Allow: /login
+Allow: /register
+Disallow: /dashboard
+Disallow: /websites
+Disallow: /history
+Disallow: /analytics
+Disallow: /backups
+Disallow: /profile
+Disallow: /api/
+Disallow: /backup-client
+
+Sitemap: /sitemap.xml

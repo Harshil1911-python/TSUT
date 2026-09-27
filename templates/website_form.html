@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} - TechSerenia UpTime{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>{{ title }}</h1>
+        <p>Configure the website or web app you want TechSerenia UpTime to monitor.</p>
+    </div>
+    <div class="card" style="max-width:560px;">
+        <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.name.label }}
+                {{ form.name(class="form-control", placeholder="My Production Site") }}
+                {% for e in form.name.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.url.label }}
+                {{ form.url(class="form-control", placeholder="https://example.com") }}
+                {% for e in form.url.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                <div class="form-hint">Must be a publicly reachable URL including the protocol (https:// or http://).</div>
+            </div>
+            <div class="form-group">
+                {{ form.ping_interval.label }}
+                {{ form.ping_interval(class="form-control") }}
+                {% for e in form.ping_interval.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.expected_status.label }}
+                {{ form.expected_status(class="form-control") }}
+                {% for e in form.expected_status.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+                <div class="form-hint">Usually 200. Change if your health endpoint returns another success code.</div>
+            </div>
+            <div class="form-group">
+                {{ form.timeout.label }}
+                {{ form.timeout(class="form-control") }}
+                {% for e in form.timeout.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="form-actions">
+                {{ form.submit(class="btn btn-primary") }}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

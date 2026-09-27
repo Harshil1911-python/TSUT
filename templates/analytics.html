@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Analytics - TechSerenia UpTime{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Analytics</h1>
+        <p>Uptime rates, response times, and error counts for every monitored site.</p>
+    </div>
+
+    {% if data %}
+    <div class="table-wrap">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Website</th>
+                    <th>Status</th>
+                    <th>Uptime 7d</th>
+                    <th>Uptime 30d</th>
+                    <th>Checks (24h)</th>
+                    <th>Up (24h)</th>
+                    <th>Avg Response (24h)</th>
+                    <th>Errors (7d)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in data %}
+                <tr>
+                    <td><a href="{{ url_for('website_detail', id=item.website.id) }}">{{ item.website.name }}</a></td>
+                    <td>
+                        {% if not item.website.is_active %}
+                        <span class="badge badge-paused">Paused</span>
+                        {% elif item.website.last_status == 'up' %}
+                        <span class="badge badge-up">Up</span>
+                        {% elif item.website.last_status == 'down' %}
+                        <span class="badge badge-down">Down</span>
+                        {% else %}
+                        <span class="badge badge-unknown">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.uptime_7 }}%</td>
+                    <td>{{ item.uptime_30 }}%</td>
+                    <td>{{ item.checks_24h }}</td>
+                    <td>{{ item.up_24h }}</td>
+                    <td>{% if item.avg_rt %}{{ item.avg_rt }} ms{% else %}--{% endif %}</td>
+                    <td class="{% if item.errors_7 > 0 %}text-error{% endif %}">{{ item.errors_7 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="card empty-state">
+        <p>Add websites to start collecting analytics.</p>
+        <a href="{{ url_for('add_website') }}" class="btn btn-primary">Add Website</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

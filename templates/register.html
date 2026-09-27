@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Create Account - TechSerenia UpTime{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="card auth-card">
+        <h1>Create Account</h1>
+        <p class="subtitle">Start monitoring and backing up your sites with TechSerenia UpTime.</p>
+        <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.username.label }}
+                {{ form.username(class="form-control", placeholder="Choose a username") }}
+                {% for e in form.username.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.email.label }}
+                {{ form.email(class="form-control", placeholder="you@example.com") }}
+                {% for e in form.email.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.full_name.label }}
+                {{ form.full_name(class="form-control", placeholder="Optional") }}
+                {% for e in form.full_name.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.password.label }}
+                {{ form.password(class="form-control", placeholder="At least 8 characters") }}
+                {% for e in form.password.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.confirm.label }}
+                {{ form.confirm(class="form-control", placeholder="Repeat password") }}
+                {% for e in form.confirm.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="form-actions">
+                {{ form.submit(class="btn btn-primary btn-block") }}
+            </div>
+        </form>
+        <p class="mt-2 text-center text-muted">Already have an account? <a href="{{ url_for('login') }}">Sign in</a></p>
+    </div>
+</div>
+{% endblock %}

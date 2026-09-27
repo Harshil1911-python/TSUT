@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}{{ website.name }} - TechSerenia UpTime{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>{{ website.name }}</h1>
+        <p><a href="{{ website.url }}" target="_blank" rel="noopener">{{ website.url }}</a></p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value">
+                {% if not website.is_active %}
+                <span class="badge badge-paused">Paused</span>
+                {% elif website.last_status == 'up' %}
+                <span class="badge badge-up">Up</span>
+                {% elif website.last_status == 'down' %}
+                <span class="badge badge-down">Down</span>
+                {% else %}
+                <span class="badge badge-unknown">Pending</span>
+                {% endif %}
+            </div>
+            <div class="stat-label">Current Status</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ uptime_7 }}%</div>
+            <div class="stat-label">Uptime 7d</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{{ uptime_30 }}%</div>
+            <div class="stat-label">Uptime 30d</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">{% if website.last_response_time is not none %}{{ website.last_response_time }} ms{% else %}--{% endif %}</div>
+            <div class="stat-label">Last Response</div>
+        </div>
+    </div>
+
+    <div class="actions-row mb-2">
+        <form method="post" action="{{ url_for('check_now', id=website.id) }}">
+            <button type="submit" class="btn btn-primary">Check Now</button>
+        </form>
+        <a href="{{ url_for('edit_website', id=website.id) }}" class="btn btn-secondary">Edit</a>
+        <form method="post" action="{{ url_for('toggle_website', id=website.id) }}">
+            <button type="submit" class="btn btn-secondary">{% if website.is_active %}Pause{% else %}Resume{% endif %}</button>
+        </form>
+        <form method="post" action="{{ url_for('delete_website', id=website.id) }}" onsubmit="return confirm('Delete this website and all its check history?');">
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+    </div>
+
+    <div class="card mb-2">
+        <h2 style="margin:0 0 0.75rem;font-size:1.05rem;">Configuration</h2>
+        <table class="data-table">
+            <tbody>
+                <tr><th>Ping Interval</th><td>{{ website.ping_interval }} minutes</td></tr>
+                <tr><th>Expected Status</th><td>{{ website.expected_status }}</td></tr>
+                <tr><th>Timeout</th><td>{{ website.timeout }} seconds</td></tr>
+                <tr><th>Last Checked</th><td>{% if website.last_checked %}{{ website.last_checked.strftime('%Y-%m-%d %H:%M:%S') }} UTC{% else %}Never{% endif %}</td></tr>
+                <tr><th>Last Status Code</th><td>{{ website.last_status_code or '--' }}</td></tr>
+                <tr><th>Last Error</th><td class="text-muted">{{ website.last_error or 'None' }}</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h2 style="margin:0 0 1rem;font-size:1.05rem;">Check History</h2>
+        {% if checks.items %}
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Time (UTC)</th>
+                        <th>Status</th>
+                        <th>Code</th>
+                        <th>Response Time</th>
+                        <th>Error</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in checks.items %}
+                    <tr>
+                        <td>{{ c.checked_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td>
+                            {% if c.is_up %}<span class="badge badge-up">Up</span>
+                            {% else %}<span class="badge badge-down">Down</span>{% endif %}
+                        </td>
+                        <td>{{ c.status_code or '--' }}</td>
+                        <td>{% if c.response_time is not none %}{{ c.response_time }} ms{% else %}--{% endif %}</td>
+                        <td class="text-muted">{{ c.error_message or '' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if checks.pages > 1 %}
+        <div class="pagination">
+            {% if checks.has_prev %}
+            <a href="{{ url_for('website_detail', id=website.id, page=checks.prev_num) }}">Previous</a>
+            {% endif %}
+            <span class="current">{{ checks.page }} / {{ checks.pages }}</span>
+            {% if checks.has_next %}
+            <a href="{{ url_for('website_detail', id=website.id, page=checks.next_num) }}">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="empty-state"><p>No checks recorded yet.</p></div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}TechSerenia UpTime - Website Monitoring and Backup{% endblock %}
+{% block content %}
+<div class="container">
+    <section class="hero">
+        <h1>Monitor Uptime. Secure Your Data.</h1>
+        <p class="lead">TechSerenia UpTime (TSUT) continuously pings your websites and web applications on the schedule you choose, tracks every check, and provides a simple client so you can push backups of your data to a safe location.</p>
+        <div class="hero-actions">
+            <a href="{{ url_for('register') }}" class="btn btn-primary">Create Free Account</a>
+            <a href="{{ url_for('login') }}" class="btn btn-secondary">Sign In</a>
+        </div>
+    </section>
+
+    <section class="features-grid">
+        <div class="feature-card">
+            <h3>Scheduled Uptime Checks</h3>
+            <p>Add any public URL and select a ping interval from 1 to 60 minutes. Every response code, latency, and error is recorded for full history and analytics.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Data Backup Client</h3>
+            <p>Drop in a lightweight Flask or HTML helper into your own project. It securely uploads database dumps or files to your TSUT account using your personal API key.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Full Analytics and Export</h3>
+            <p>View uptime percentages, average response times, error counts, and filterable history. Export any period to CSV or Excel for reports and audits.</p>
+        </div>
+        <div class="feature-card">
+            <h3>Clear Status and Errors</h3>
+            <p>Dashboard and detail pages show live status, last check time, response codes, and exact error messages so you can act immediately when something fails.</p>
+        </div>
+    </section>
+</div>
+{% endblock %}

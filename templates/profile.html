@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Profile - TechSerenia UpTime{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Profile</h1>
+        <p>Manage your account and API key for the Backup Client.</p>
+    </div>
+
+    <div class="card mb-2" style="max-width:520px;">
+        <h2 style="margin:0 0 1rem;font-size:1.05rem;">Account Details</h2>
+        <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="profile" value="1">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" class="form-control" value="{{ current_user.username }}" disabled>
+            </div>
+            <div class="form-group">
+                {{ form.full_name.label }}
+                {{ form.full_name(class="form-control") }}
+                {% for e in form.full_name.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="form-group">
+                {{ form.email.label }}
+                {{ form.email(class="form-control") }}
+                {% for e in form.email.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="form-group form-check">
+                {{ form.dark_mode() }}
+                {{ form.dark_mode.label }}
+            </div>
+            <div class="form-actions">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+
+    <div class="card mb-2" style="max-width:520px;">
+        <h2 style="margin:0 0 0.75rem;font-size:1.05rem;">API Key</h2>
+        <p class="text-muted" style="font-size:0.9rem;">Use this key in the Backup Client header <code>X-API-Key</code>. Keep it secret.</p>
+        <div class="code-block">{{ current_user.api_key }}</div>
+        <form method="post" action="{{ url_for('regenerate_api_key') }}" class="mt-1" onsubmit="return confirm('Regenerate API key? Existing clients will stop working until updated.');">
+            <button type="submit" class="btn btn-secondary btn-sm">Regenerate API Key</button>
+        </form>
+    </div>
+
+    <div class="card" style="max-width:520px;">
+        <h2 style="margin:0 0 1rem;font-size:1.05rem;">Change Password</h2>
+        <form method="post" novalidate>
+            {{ pwd_form.hidden_tag() }}
+            <input type="hidden" name="password" value="1">
+            <div class="form-group">
+                {{ pwd_form.current_password.label }}
+                {{ pwd_form.current_password(class="form-control") }}
+                {% for e in pwd_form.current_password.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="form-group">
+                {{ pwd_form.new_password.label }}
+                {{ pwd_form.new_password(class="form-control") }}
+                {% for e in pwd_form.new_password.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="form-group">
+                {{ pwd_form.confirm.label }}
+                {{ pwd_form.confirm(class="form-control") }}
+                {% for e in pwd_form.confirm.errors %}<div class="form-error">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="form-actions">
+                {{ pwd_form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function() {
+    // Sync dark_mode checkbox with current theme for convenience
+    var theme = document.documentElement.getAttribute('data-theme');
+    var cb = document.querySelector('input[name="dark_mode"]');
+    if (cb && theme === 'dark') cb.checked = true;
+})();
+</script>
+{% endblock %}

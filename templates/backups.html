@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Backups - TechSerenia UpTime{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Backups</h1>
+        <p>Files and data uploaded via the Backup Client or API.</p>
+    </div>
+
+    <div class="actions-row mb-2">
+        <a href="{{ url_for('backup_client') }}" class="btn btn-primary">Get Backup Client</a>
+    </div>
+
+    <div class="card">
+        {% if backups.items %}
+        <div class="table-wrap">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Original Name</th>
+                        <th>Size</th>
+                        <th>Source</th>
+                        <th>Website</th>
+                        <th>Uploaded (UTC)</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for b in backups.items %}
+                    <tr>
+                        <td>{{ b.original_name or b.filename }}</td>
+                        <td>{{ b.size_human() }}</td>
+                        <td>{{ b.source or '--' }}</td>
+                        <td>{% if b.website %}<a href="{{ url_for('website_detail', id=b.website_id) }}">{{ b.website.name }}</a>{% else %}--{% endif %}</td>
+                        <td>{{ b.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td class="text-muted">{{ b.notes or '' }}</td>
+                        <td>
+                            <div class="actions-row">
+                                <a href="{{ url_for('download_backup', id=b.id) }}" class="btn btn-sm btn-secondary">Download</a>
+                                <form method="post" action="{{ url_for('delete_backup', id=b.id) }}" onsubmit="return confirm('Delete this backup permanently?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if backups.pages > 1 %}
+        <div class="pagination">
+            {% if backups.has_prev %}
+            <a href="{{ url_for('backups', page=backups.prev_num) }}">Previous</a>
+            {% endif %}
+            <span class="current">{{ backups.page }} / {{ backups.pages }}</span>
+            {% if backups.has_next %}
+            <a href="{{ url_for('backups', page=backups.next_num) }}">Next</a>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="empty-state">
+            <p>No backups yet. Use the Backup Client to push data from your applications.</p>
+            <a href="{{ url_for('backup_client') }}" class="btn btn-primary">View Backup Client</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
