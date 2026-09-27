@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TSUT Backup Upload</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 480px; margin: 2rem auto; padding: 0 1rem; color: #1a2a3a; }
+        h1 { font-size: 1.25rem; }
+        label { display: block; font-weight: 600; margin: 0.75rem 0 0.25rem; font-size: 0.875rem; }
+        input[type="text"], input[type="file"] { width: 100%; padding: 0.5rem; border: 1px solid #c8dff0; border-radius: 6px; box-sizing: border-box; }
+        button { margin-top: 1rem; padding: 0.55rem 1.1rem; background: #2b6cb0; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
+        button:hover { background: #1e4e8c; }
+        .msg { margin-top: 1rem; padding: 0.7rem; border-radius: 6px; font-size: 0.9rem; }
+        .ok { background: #e6f4ea; color: #2f855a; }
+        .err { background: #fde8e8; color: #c53030; }
+        .hint { font-size: 0.8rem; color: #5a6a7a; }
+    </style>
+</head>
+<body>
+    <h1>TechSerenia UpTime - Manual Backup Upload</h1>
+    <p class="hint">Host this page on your own domain. Enter your API key and select a file. The key is only sent to the TSUT server you configure.</p>
+    <form id="form">
+        <label for="base">TSUT Base URL</label>
+        <input type="text" id="base" placeholder="https://your-tsut-instance.com" required>
+        <label for="key">API Key</label>
+        <input type="text" id="key" placeholder="Your X-API-Key" required>
+        <label for="notes">Notes (optional)</label>
+        <input type="text" id="notes" placeholder="Manual upload">
+        <label for="file">File</label>
+        <input type="file" id="file" required>
+        <button type="submit">Upload Backup</button>
+    </form>
+    <div id="msg"></div>
+    <script>
+        document.getElementById('form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            var msg = document.getElementById('msg');
+            msg.className = 'msg';
+            msg.textContent = 'Uploading...';
+            var base = document.getElementById('base').value.replace(/\/$/, '');
+            var key = document.getElementById('key').value.trim();
+            var notes = document.getElementById('notes').value.trim();
+            var fileInput = document.getElementById('file');
+            if (!fileInput.files.length) {
+                msg.className = 'msg err';
+                msg.textContent = 'Select a file.';
+                return;
+            }
+            var fd = new FormData();
+            fd.append('file', fileInput.files[0]);
+            fd.append('source', 'html-client');
+            if (notes) fd.append('notes', notes);
+            try {
+                var resp = await fetch(base + '/api/v1/backup', {
+                    method: 'POST',
+                    headers: { 'X-API-Key': key },
+                    body: fd
+                });
+                var data = await resp.json().catch(function () { return {}; });
+                if (resp.ok) {
+                    msg.className = 'msg ok';
+                    msg.textContent = 'Upload successful. Backup ID: ' + (data.backup_id || 'ok');
+                } else {
+                    msg.className = 'msg err';
+                    msg.textContent = data.error || ('HTTP ' + resp.status);
+                }
+            } catch (err) {
+                msg.className = 'msg err';
+                msg.textContent = 'Request failed: ' + err.message;
+            }
+        });
+    </script>
+</body>
+</html>

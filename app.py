@@ -34,7 +34,7 @@ app.config.from_object(Config)
 
 @app.context_processor
 def inject_globals():
-    return {'current_year': datetime.utcnow().year}
+    return {'current_year': datetime.now().year}
 
 os.makedirs(app.config['BACKUP_FOLDER'], exist_ok=True)
 
@@ -644,6 +644,7 @@ def init_db():
 
 
 def create_app():
+    """Factory for gunicorn / production: gunicorn -w 1 'app:create_app()'"""
     with app.app_context():
         db.create_all()
         if not scheduler.running:
@@ -652,10 +653,30 @@ def create_app():
     return app
 
 
+# Run table creation + scheduler on import (works with both python app.py and gunicorn app:app)
+with app.app_context():
+    db.create_all()
+
+if not scheduler.running:
+    try:
+        scheduler.start()
+    except Exception:
+        pass
+
+
+@app.before_request
+def _ensure_scheduler_jobs():
+    """Lazy-load existing website jobs once the app is serving requests."""
+    if not getattr(app, '_jobs_loaded', False):
+        try:
+            reschedule_all()
+        except Exception:
+            pass
+        app._jobs_loaded = True
+
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
     if not scheduler.running:
         scheduler.start()
-        reschedule_all()
+    reschedule_all()
     app.run(host='0.0.0.0', port=5000, debug=True)

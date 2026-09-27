@@ -48,17 +48,15 @@ Open http://127.0.0.1:5000 — tables are created automatically.
 
 ## Production (Render / Gunicorn)
 
-```bash
-gunicorn -w 2 -b 0.0.0.0:$PORT "app:create_app()"
-```
-
-Or:
+Recommended start command (single worker is best with the built-in scheduler + SQLite):
 
 ```bash
-gunicorn -w 2 -b 0.0.0.0:$PORT app:app
+gunicorn -w 1 -b 0.0.0.0:$PORT app:app
 ```
 
-Set `SECRET_KEY` and optionally `DATABASE_URL`. For multi-worker setups, consider an external scheduler so only one process runs the ping jobs.
+Set `SECRET_KEY` (required). Leave `DATABASE_URL` unset to use SQLite.
+
+Tables are created automatically on first start.
 
 ## Backup Client
 
